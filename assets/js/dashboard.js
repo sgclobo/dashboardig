@@ -28,17 +28,14 @@
     sidebar.classList.contains("collapsed") ? openSidebar() : closeSidebar();
   }
 
-  // Restore state on load
   if (isMobile()) {
     closeSidebar();
   } else {
-    const saved = localStorage.getItem("sidebar_open");
-    if (saved === "0") closeSidebar(); // default open on desktop
+    if (localStorage.getItem("sidebar_open") === "0") closeSidebar();
   }
 
   toggleBt && toggleBt.addEventListener("click", toggleSidebar);
   overlay && overlay.addEventListener("click", closeSidebar);
-
   window.addEventListener("resize", () => {
     if (!isMobile()) overlay.classList.remove("active");
   });
@@ -49,27 +46,20 @@
   const topTitle = document.getElementById("topbar-title");
 
   function activateSection(slug) {
-    // Update nav
     navItems.forEach((el) =>
       el.classList.toggle("active", el.dataset.section === slug),
     );
-
-    // Update panels
     panels.forEach((p) =>
       p.classList.toggle("active", p.id === "section-" + slug),
     );
 
-    // Update topbar title
-    const item = document.querySelector(`.nav-item[data-section="${slug}"]`);
+    const item = document.querySelector(
+      '.nav-item[data-section="' + slug + '"]',
+    );
     if (item && topTitle) topTitle.textContent = item.dataset.label || slug;
 
-    // Update URL hash (no full reload)
     history.replaceState(null, "", "#" + slug);
-
-    // On mobile, close sidebar after navigation
     if (isMobile()) closeSidebar();
-
-    // Lazy-load data for the section
     loadSection(slug);
   }
 
@@ -77,43 +67,48 @@
     item.addEventListener("click", () => activateSection(item.dataset.section));
   });
 
-  // Load section from hash on page load
   const initSlug =
     location.hash.slice(1) ||
-    (navItems[0] ? navItems[0].dataset.section : "home");
+    (navItems[0] ? navItems[0].dataset.section : "overview");
   activateSection(initSlug);
 
-  /* ── Data loading via fetch API ──────────────────────── */
-  const loaded = {}; // cache which sections we've already fetched
+  /* ── Data loading ────────────────────────────────────── */
+  const loaded = {};
 
   function loadSection(slug) {
     if (loaded[slug]) return;
     const panel = document.getElementById("section-" + slug);
     if (!panel) return;
 
-    // Only fetch if the panel has a data-source attribute
     const source = panel.dataset.source;
     if (!source) {
       loaded[slug] = true;
       return;
     }
 
-    // Show loading state
     const container = panel.querySelector(".stats-grid");
     if (container) {
       container.innerHTML =
-        '<div class="stat-card" style="opacity:.4"><div class="stat-label">Loading…</div></div>';
+        '<div class="stat-card" style="opacity:.4"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>';
     }
 
     fetch("/api/section.php?source=" + encodeURIComponent(source))
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((data) => renderSection(panel, data))
-      .catch((err) => {
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (data) {
+        renderSection(panel, data);
+      })
+      .catch(function (err) {
         if (container) {
-          container.innerHTML = `<div class="alert error">⚠ Could not load data (${err}). Is the subdomain API reachable?</div>`;
+          container.innerHTML =
+            '<div class="alert error">⚠ Could not load data: ' +
+            err.message +
+            "</div>";
         }
       })
-      .finally(() => {
+      .finally(function () {
         loaded[slug] = true;
       });
   }
@@ -123,138 +118,94 @@
     if (!grid) return;
 
     if (data.error) {
-      grid.innerHTML = `<div class="alert error">⚠ ${data.error}</div>`;
+      grid.innerHTML = '<div class="alert error">⚠ ' + data.error + "</div>";
       return;
     }
 
-    // Generic renderer: turn each key/value pair into a stat card
     const cards = Object.entries(data)
-      .filter(([k]) => !k.startsWith("_")) // skip meta keys
-      .map(([k, v]) => {
+      .filter(function (entry) {
+        return !entry[0].startsWith("_");
+      })
+      .map(function (entry) {
+        const k = entry[0],
+          v = entry[1];
         const label = k.replace(/_/g, " ");
         const value = typeof v === "number" ? v.toLocaleString() : v;
-        return `
-                <div class="stat-card">
-                    <div class="stat-label">${label}</div>
-                    <div class="stat-value">${value}</div>
-                </div>`;
+        return (
+          '<div class="stat-card"><div class="stat-label">' +
+          label +
+          '</div><div class="stat-value">' +
+          value +
+          "</div></div>"
+        );
       })
       .join("");
 
     grid.innerHTML =
       cards || '<p style="color:var(--muted)">No data returned.</p>';
 
-    // Update status badge
     const badge = panel.querySelector(".badge-status");
     if (badge) {
       badge.className = "badge-status live";
       badge.textContent = "Live";
     }
-    renderExtras(panel, data);
   }
 
-  function renderExtras(panel, data) {
-    const slug = panel.dataset.source;
-    const container = document.getElementById(slug + "-extras");
-    if (!container) return;
-    container.innerHTML = "";
-
-    const esc = (s) =>
-      String(s ?? "").replace(
-        /[&<>"]/g,
-        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
-      );
-
-    // ── Recent records table ──────────────────────────────
-    if (data._recent && data._recent.length) {
-      let thead = "",
-        rows = "";
-
-      if (slug === "inspections") {
-        thead = "<tr><th>Date</th><th>Municipality</th><th>Type</th></tr>";
-        rows = data._recent
-          .map(
-            (r) =>
-              `<tr><td>${esc(r.report_date)}</td><td>${esc(r.munisipiu)}</td><td>${esc(r.inspection_type)}</td></tr>`
-          )
-          .join("");
-      } else if (slug === "fines") {
-        thead =
-          '<tr><th>Date</th><th>Payer</th><th>Business</th><th class="extras-num">Amount</th></tr>';
-        rows = data._recent
-          .map(
-            (r) =>
-              `<tr><td>${esc(r.payment_date)}</td><td>${esc(r.payer_name)}</td><td>${esc(r.business_name)}</td><td class="extras-num">$${(+r.total_value).toLocaleString("en", { minimumFractionDigits: 2 })}</td></tr>`
-          )
-          .join("");
-      }
-
-      if (thead) {
-        container.innerHTML += `
-          <div class="extras-block">
-            <h3 class="extras-title">Recent 10</h3>
-            <div class="extras-table-wrap">
-              <table class="extras-table">
-                <thead>${thead}</thead>
-                <tbody>${rows}</tbody>
-              </table>
-            </div>
-          </div>`;
-      }
-    }
-
-    // ── Monthly bar charts (fines only) ──────────────────
-    if (data._monthly_2025 || data._monthly_2026) {
-      const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-      const COLORS = ["#c9a84c","#4a90d9","#4caf82","#e05555","#8b5cf6","#e0a030","#5dade2","#ff6b35","#8b2c9b","#2e5266","#4caf82","#c9a84c"];
-
-      const buildChart = (monthly, label) => {
-        const map = {};
-        (monthly || []).forEach((r) => { map[+r.m] = r; });
-        const bars = MONTHS.map((name, i) => ({
-          name,
-          total: +(map[i + 1]?.t ?? 0),
-          count: +(map[i + 1]?.c ?? 0),
-        }));
-        const maxVal = Math.max(1, ...bars.map((b) => b.total));
-        return `
-          <div class="extras-chart-wrap">
-            <h4 class="extras-subtitle">${label}</h4>
-            <div class="extras-chart">
-              ${bars
-                .map(
-                  (b, i) => `
-                <div class="extras-bar-col">
-                  <div class="extras-bar-val">${b.count || ""}</div>
-                  <div class="extras-bar"
-                    style="height:${Math.round((b.total / maxVal) * 100)}%;background:${COLORS[i]}"
-                    title="${b.name}: $${b.total.toLocaleString()} (${b.count} fines)"></div>
-                  <div class="extras-bar-lbl">${b.name}</div>
-                </div>`
-                )
-                .join("")}
-            </div>
-          </div>`;
-      };
-
-      container.innerHTML += `
-        <div class="extras-block extras-charts-row">
-          ${buildChart(data._monthly_2025, "Monthly Fines 2025")}
-          ${buildChart(data._monthly_2026, "Monthly Fines 2026")}
-        </div>`;
-    }  }
-
-  /* ── Manual refresh ──────────────────────────────────── */
-  document.getElementById("btn-refresh") &&
-    document.getElementById("btn-refresh").addEventListener("click", () => {
+  /* ── Refresh button ──────────────────────────────────── */
+  const btnRefresh = document.getElementById("btn-refresh");
+  if (btnRefresh) {
+    btnRefresh.addEventListener("click", function () {
       const slug = location.hash.slice(1) || initSlug;
       delete loaded[slug];
       loadSection(slug);
     });
+  }
 
-  /* ── Logout ──────────────────────────────────────────── */
-  document.getElementById("btn-logout") &&
-    document.getElementById("btn-logout").addEventListener("click", () => {
+  /* ── Sign out button ─────────────────────────────────── */
+  const btnLogout = document.getElementById("btn-logout");
+  if (btnLogout) {
+    btnLogout.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
       window.location.href = "/logout.php";
     });
+  }
+
+  /* ── Live clock ──────────────────────────────────────── */
+  function updateClock() {
+    const el = document.getElementById("topbar-clock");
+    if (!el) return;
+    const now = new Date();
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const pad = function (n) {
+      return String(n).padStart(2, "0");
+    };
+    el.textContent =
+      days[now.getDay()] +
+      ", " +
+      pad(now.getDate()) +
+      " " +
+      months[now.getMonth()] +
+      " " +
+      now.getFullYear() +
+      " · " +
+      pad(now.getHours()) +
+      ":" +
+      pad(now.getMinutes());
+  }
+  setInterval(updateClock, 30000);
 })();
