@@ -161,16 +161,6 @@
     });
   }
 
-  /* ── Sign out button ─────────────────────────────────── */
-  const btnLogout = document.getElementById("btn-logout");
-  if (btnLogout) {
-    btnLogout.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      window.location.assign("logout.php");
-    });
-  }
-
   /* ── Live clock ──────────────────────────────────────── */
   function updateClock() {
     const el = document.getElementById("topbar-clock");

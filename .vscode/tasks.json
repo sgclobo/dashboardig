@@ -1,44 +1,44 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Start Local Server",
-            "type": "shell",
-            "command": "php -S localhost:8000 router.php",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "isBackground": true,
-            "problemMatcher": {
-                "pattern": {
-                    "regexp": "^(.*)$",
-                    "file": 1,
-                    "line": 1,
-                    "message": 1
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^PHP.*Development Server",
-                    "endsPattern": "^Listening on"
-                }
-            },
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated",
-                "clear": true
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Local Server",
+      "type": "shell",
+      "command": "php -S localhost:8000 router.php",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1,
+          "line": 1,
+          "message": 1
         },
-        {
-            "label": "Stop Local Server",
-            "type": "shell",
-            "command": "kill $(lsof -ti:8000) 2>/dev/null || taskkill /F /IM php.exe 2>nul",
-            "presentation": {
-                "reveal": "silent"
-            }
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^PHP.*Development Server",
+          "endsPattern": "^Listening on"
         }
-    ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Stop Local Server",
+      "type": "shell",
+      "command": "$serverPid = (Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty OwningProcess); if ($serverPid) { Stop-Process -Id $serverPid -Force } else { Get-Process php -ErrorAction SilentlyContinue | Stop-Process -Force }",
+      "presentation": {
+        "reveal": "silent"
+      }
+    }
+  ]
 }

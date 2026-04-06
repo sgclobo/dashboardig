@@ -141,13 +141,13 @@ function icon(string $name, array $icons): string {
                     Refresh
                 </button>
 
-                <button class="btn-refresh" id="btn-logout" type="button" style="margin-left:.25rem">
+                <a class="btn-refresh" id="btn-logout" data-logout href="logout.php" style="margin-left:.25rem">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
                     </svg>
                     Sign out
-                </button>
+                </a>
             </div>
             <!-- /Topbar -->
 
@@ -231,7 +231,7 @@ function icon(string $name, array $icons): string {
     </div>
     <!-- /layout -->
 
-    <script src="assets/js/dashboard.js"></script>
+    <script src="assets/js/dashboard.js?v=<?= (int) @filemtime(__DIR__ . '/assets/js/dashboard.js') ?>"></script>
     <script>
     // Live clock update
     setInterval(() => {
