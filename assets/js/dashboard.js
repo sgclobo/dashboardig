@@ -92,7 +92,7 @@
         '<div class="stat-card" style="opacity:.4"><div class="stat-label">Loading…</div><div class="stat-value">—</div></div>';
     }
 
-    fetch("/api/section.php?source=" + encodeURIComponent(source))
+    fetch("api/section.php?source=" + encodeURIComponent(source))
       .then(function (r) {
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
@@ -167,7 +167,7 @@
     btnLogout.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
-      window.location.href = "/logout.php";
+      window.location.assign("logout.php");
     });
   }
 

@@ -1,12 +1,12 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 session_start_safe();
-if (!empty($_SESSION['user_id'])) { header('Location: /'); exit; }
+if (!empty($_SESSION['user_id'])) { header('Location: ./'); exit; }
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
-        header('Location: /index.php');
+        header('Location: index.php');
         exit;
     }
     $error = 'Invalid email or password.';
@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
 
-        <form method="POST" action="/login.php" autocomplete="on">
+        <form method="POST" action="login.php" autocomplete="on">
             <div class="field">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required autofocus

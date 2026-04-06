@@ -39,7 +39,7 @@ function icon(string $name, array $icons): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars(SITE_NAME) ?></title>
-    <link rel="stylesheet" href="/assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
 </head>
 
 <body>
@@ -141,7 +141,7 @@ function icon(string $name, array $icons): string {
                     Refresh
                 </button>
 
-                <button class="btn-refresh" id="btn-logout" style="margin-left:.25rem">
+                <button class="btn-refresh" id="btn-logout" type="button" style="margin-left:.25rem">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round"
                             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
@@ -231,7 +231,7 @@ function icon(string $name, array $icons): string {
     </div>
     <!-- /layout -->
 
-    <script src="/assets/js/dashboard.js"></script>
+    <script src="assets/js/dashboard.js"></script>
     <script>
     // Live clock update
     setInterval(() => {

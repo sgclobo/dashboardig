@@ -23,7 +23,7 @@ function require_login(): void
 {
     session_start_safe();
     if (empty($_SESSION['user_id'])) {
-        header('Location: /login.php');
+        header('Location: login.php');
         exit;
     }
 }
@@ -77,6 +77,6 @@ function logout(): void
     }
 
     session_destroy();
-    header('Location: /login.php');
+    header('Location: login.php');
     exit;
 }
