@@ -7,6 +7,48 @@
 require_once __DIR__ . '/db.php';
 
 /**
+ * Resolve a local PHP data file for a source row.
+ * Supports conventional slug names and explicit /data/... api_url values.
+ */
+function resolve_local_data_file(array $source): ?string {
+    $slug = (string)($source['slug'] ?? '');
+    $base = realpath(__DIR__ . '/../data');
+    if ($base === false) {
+        return null;
+    }
+
+    $candidates = [];
+
+    if ($slug !== '') {
+        $safeSlug = preg_replace('/[^a-z0-9_\-]/i', '', $slug);
+        $candidates[] = $base . DIRECTORY_SEPARATOR . 'data_' . $safeSlug . '.php';
+        $candidates[] = $base . DIRECTORY_SEPARATOR . $safeSlug . '.php';
+    }
+
+    $apiUrl = (string)($source['api_url'] ?? '');
+    if ($apiUrl !== '') {
+        $path = parse_url($apiUrl, PHP_URL_PATH);
+        if (is_string($path) && $path !== '') {
+            $path = ltrim(str_replace('\\', '/', $path), '/');
+            if (str_starts_with($path, 'data/')) {
+                $explicit = realpath(__DIR__ . '/../' . $path);
+                if ($explicit !== false && str_starts_with($explicit, $base . DIRECTORY_SEPARATOR)) {
+                    $candidates[] = $explicit;
+                }
+            }
+        }
+    }
+
+    foreach ($candidates as $file) {
+        if ($file && is_file($file)) {
+            return $file;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Get data for one source row from data_sources.
  * Returns a plain associative array (never throws).
  */
@@ -14,8 +56,8 @@ function fetch_source(array $source): array {
     $slug = $source['slug'];
 
     // ── 1. Local data file (highest priority) ──────────────
-    $localFile = __DIR__ . '/../data/data_' . $slug . '.php';
-    if (file_exists($localFile)) {
+    $localFile = resolve_local_data_file($source);
+    if ($localFile !== null) {
         $data = require $localFile;
         if (is_array($data) && !empty($data)) {
             return $data;
