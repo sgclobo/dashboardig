@@ -392,6 +392,15 @@ a {
   animation: fadeIn 0.2s ease;
 }
 
+/* Non-JS fallback: show default overview and hash-targeted sections */
+#section-overview {
+  display: block;
+}
+.section-panel:target {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

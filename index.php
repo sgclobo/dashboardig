@@ -7,6 +7,10 @@ require_login();
 
 $user    = current_user();
 $sources = all_sources();
+$sourceStats = [];
+foreach ($sources as $src) {
+    $sourceStats[$src['slug']] = fetch_source($src);
+}
 
 // Log access
 db()->prepare('INSERT INTO access_log (user_id, section, ip) VALUES (?,?,?)')
@@ -30,6 +34,17 @@ $icons = [
 function icon(string $name, array $icons): string {
     $path = $icons[$name] ?? $icons['circle'];
     return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">' . $path . '</svg>';
+}
+
+function stat_label(string $key): string {
+    return ucwords(str_replace('_', ' ', $key));
+}
+
+function stat_value($value): string {
+    if (is_int($value) || is_float($value)) {
+        return number_format((float) $value, 0, '.', ',');
+    }
+    return (string) $value;
 }
 ?>
 <!DOCTYPE html>
@@ -67,16 +82,17 @@ function icon(string $name, array $icons): string {
                 <div class="section-label">Monitoring</div>
 
                 <?php foreach ($sources as $src): ?>
-                <div class="nav-item" data-section="<?= htmlspecialchars($src['slug']) ?>"
+                <a class="nav-item" href="#section-<?= htmlspecialchars($src['slug']) ?>"
+                    data-section="<?= htmlspecialchars($src['slug']) ?>"
                     data-label="<?= htmlspecialchars($src['label']) ?>" title="<?= htmlspecialchars($src['label']) ?>">
                     <span class="nav-icon"><?= icon($src['icon'], $icons) ?></span>
                     <span class="nav-label"><?= htmlspecialchars($src['label']) ?></span>
-                </div>
+                </a>
                 <?php endforeach; ?>
 
                 <div class="section-label" style="margin-top:.5rem">System</div>
 
-                <div class="nav-item" data-section="overview" data-label="Overview" title="Overview">
+                <a class="nav-item" href="#section-overview" data-section="overview" data-label="Overview" title="Overview">
                     <span class="nav-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -86,10 +102,10 @@ function icon(string $name, array $icons): string {
                         </svg>
                     </span>
                     <span class="nav-label">Overview</span>
-                </div>
+                </a>
 
                 <?php if ($user['role'] === 'admin'): ?>
-                <div class="nav-item" data-section="settings" data-label="Settings" title="Settings">
+                <a class="nav-item" href="#section-settings" data-section="settings" data-label="Settings" title="Settings">
                     <span class="nav-icon">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -98,7 +114,7 @@ function icon(string $name, array $icons): string {
                         </svg>
                     </span>
                     <span class="nav-label">Settings</span>
-                </div>
+                </a>
                 <?php endif; ?>
 
             </nav>
@@ -188,12 +204,27 @@ function icon(string $name, array $icons): string {
                         <span class="badge-status cache">Cached</span>
                     </div>
 
-                    <!-- Stats cards — populated via JS -->
                     <div class="stats-grid">
-                        <div class="stat-card" style="opacity:.35">
-                            <div class="stat-label">Loading…</div>
-                            <div class="stat-value">—</div>
+                        <?php $data = $sourceStats[$src['slug']] ?? []; ?>
+                        <?php if (isset($data['error'])): ?>
+                        <div class="alert error">⚠ <?= htmlspecialchars((string) $data['error']) ?></div>
+                        <?php else: ?>
+                        <?php
+                            $entries = array_filter($data, static function ($k) {
+                                return !str_starts_with((string) $k, '_');
+                            }, ARRAY_FILTER_USE_KEY);
+                        ?>
+                        <?php if (!empty($entries)): ?>
+                        <?php foreach ($entries as $k => $v): ?>
+                        <div class="stat-card">
+                            <div class="stat-label"><?= htmlspecialchars(stat_label((string) $k)) ?></div>
+                            <div class="stat-value"><?= htmlspecialchars(stat_value($v)) ?></div>
                         </div>
+                        <?php endforeach; ?>
+                        <?php else: ?>
+                        <p style="color:var(--muted)">No data returned.</p>
+                        <?php endif; ?>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Placeholder for future charts/tables per section -->
