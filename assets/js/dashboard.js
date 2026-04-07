@@ -255,6 +255,6 @@
   /* ── Logout ──────────────────────────────────────────── */
   document.getElementById("btn-logout") &&
     document.getElementById("btn-logout").addEventListener("click", () => {
-      if (confirm("Sign out?")) window.location.href = "/logout.php";
+      window.location.href = "/logout.php";
     });
 })();
