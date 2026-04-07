@@ -105,7 +105,7 @@
         '<div class="stat-card" style="opacity:.4"><div class="stat-label">Loading…</div></div>';
     }
 
-    fetch("/section.php?source=" + encodeURIComponent(source))
+    fetch("/api/section.php?source=" + encodeURIComponent(source))
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((data) => renderSection(panel, data))
       .catch((err) => {
@@ -150,7 +150,99 @@
       badge.className = "badge-status live";
       badge.textContent = "Live";
     }
+    renderExtras(panel, data);
   }
+
+  function renderExtras(panel, data) {
+    const slug = panel.dataset.source;
+    const container = document.getElementById(slug + "-extras");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const esc = (s) =>
+      String(s ?? "").replace(
+        /[&<>"]/g,
+        (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
+      );
+
+    // ── Recent records table ──────────────────────────────
+    if (data._recent && data._recent.length) {
+      let thead = "",
+        rows = "";
+
+      if (slug === "inspections") {
+        thead = "<tr><th>Date</th><th>Municipality</th><th>Type</th></tr>";
+        rows = data._recent
+          .map(
+            (r) =>
+              `<tr><td>${esc(r.report_date)}</td><td>${esc(r.munisipiu)}</td><td>${esc(r.inspection_type)}</td></tr>`
+          )
+          .join("");
+      } else if (slug === "fines") {
+        thead =
+          '<tr><th>Date</th><th>Payer</th><th>Business</th><th class="extras-num">Amount</th></tr>';
+        rows = data._recent
+          .map(
+            (r) =>
+              `<tr><td>${esc(r.payment_date)}</td><td>${esc(r.payer_name)}</td><td>${esc(r.business_name)}</td><td class="extras-num">$${(+r.total_value).toLocaleString("en", { minimumFractionDigits: 2 })}</td></tr>`
+          )
+          .join("");
+      }
+
+      if (thead) {
+        container.innerHTML += `
+          <div class="extras-block">
+            <h3 class="extras-title">Recent 10</h3>
+            <div class="extras-table-wrap">
+              <table class="extras-table">
+                <thead>${thead}</thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+    }
+
+    // ── Monthly bar charts (fines only) ──────────────────
+    if (data._monthly_2025 || data._monthly_2026) {
+      const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const COLORS = ["#c9a84c","#4a90d9","#4caf82","#e05555","#8b5cf6","#e0a030","#5dade2","#ff6b35","#8b2c9b","#2e5266","#4caf82","#c9a84c"];
+
+      const buildChart = (monthly, label) => {
+        const map = {};
+        (monthly || []).forEach((r) => { map[+r.m] = r; });
+        const bars = MONTHS.map((name, i) => ({
+          name,
+          total: +(map[i + 1]?.t ?? 0),
+          count: +(map[i + 1]?.c ?? 0),
+        }));
+        const maxVal = Math.max(1, ...bars.map((b) => b.total));
+        return `
+          <div class="extras-chart-wrap">
+            <h4 class="extras-subtitle">${label}</h4>
+            <div class="extras-chart">
+              ${bars
+                .map(
+                  (b, i) => `
+                <div class="extras-bar-col">
+                  <div class="extras-bar-val">${b.count || ""}</div>
+                  <div class="extras-bar"
+                    style="height:${Math.round((b.total / maxVal) * 100)}%;background:${COLORS[i]}"
+                    title="${b.name}: $${b.total.toLocaleString()} (${b.count} fines)"></div>
+                  <div class="extras-bar-lbl">${b.name}</div>
+                </div>`
+                )
+                .join("")}
+            </div>
+          </div>`;
+      };
+
+      container.innerHTML += `
+        <div class="extras-block extras-charts-row">
+          ${buildChart(data._monthly_2025, "Monthly Fines 2025")}
+          ${buildChart(data._monthly_2026, "Monthly Fines 2026")}
+        </div>`;
+    }  }
 
   /* ── Manual refresh ──────────────────────────────────── */
   document.getElementById("btn-refresh") &&

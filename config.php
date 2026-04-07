@@ -20,6 +20,16 @@ define('DB_USER', 'u781534777_dashboarduser');
 define('DB_PASS', 'S3rgio@1060');
 define('DB_SQLITE', '');
 
+// ── Source DB (inspections & fines — aifaesa.gov.tl) ──────
+define('SOURCE_DB_HOST', 'localhost');
+define('SOURCE_DB_NAME', 'u781534777_aifaesa');
+define('SOURCE_DB_USER', 'u781534777_SL_aifaesa');
+define('SOURCE_DB_PASS', 'S3rgio@1060');
+
+// ── Internal API tokens ───────────────────────────────────
+define('TOKEN_INSPECTIONS', 'AIFAESA_INSP_API_2026');
+define('TOKEN_FINES',       'AIFAESA_KOIMAS_API_2026');
+
 define('SITE_NAME', 'AIFAESA Dashboard');
 define('CACHE_TTL',  5 * 60);
 define('SESSION_NAME', 'aifaesa_dash');

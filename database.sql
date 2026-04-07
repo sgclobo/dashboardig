@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS data_sources (
 
 -- Pre-populate with your known subdomains
 INSERT INTO data_sources (slug, label, icon, api_url, api_token, tab_order) VALUES
-('inspections', 'Inspections',    'clipboard-check',  'https://seksaunit.aifaesa.org/api/stats.php',  'CHANGE_TOKEN_1', 1),
-('fines',       'Fines',          'exclamation-circle','https://seksaunit.aifaesa.org/api/fines.php',  'CHANGE_TOKEN_1', 2),
+('inspections', 'Inspections',    'clipboard-check',   'https://dashboard.aifaesa.org/api/inspections.php', 'AIFAESA_INSP_API_2026',    1),
+('fines',       'Fines',          'exclamation-circle', 'https://dashboard.aifaesa.org/api/fines.php',        'AIFAESA_KOIMAS_API_2026',  2),
 ('hr',          'Human Resources','users',             'https://personalia.aifaesa.org/api/stats.php', 'CHANGE_TOKEN_2', 3),
 ('logistics',   'Logistics',      'truck',             'https://lojistika.aifaesa.org/api/stats.php',  'CHANGE_TOKEN_3', 4),
 ('it',          'IT',             'server',            'https://it.aifaesa.org/api/stats.php',         'CHANGE_TOKEN_4', 5),

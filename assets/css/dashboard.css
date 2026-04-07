@@ -564,3 +564,132 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Section extras (recent tables, mini charts) ───────── */
+.extras-block {
+  margin-top: 1.5rem;
+}
+
+.extras-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.extras-subtitle {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 0.6rem;
+}
+
+.extras-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.extras-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+}
+
+.extras-table thead tr {
+  background: var(--navy3);
+}
+
+.extras-table th {
+  text-align: left;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.extras-table td {
+  padding: 0.55rem 0.9rem;
+  border-top: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.extras-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text);
+}
+
+.extras-num {
+  text-align: right;
+  font-family: var(--mono);
+  color: var(--success);
+  font-weight: 500;
+}
+
+/* Monthly bar charts (fines) */
+.extras-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.extras-chart-wrap {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1rem 0.5rem;
+}
+
+.extras-chart {
+  display: flex;
+  align-items: flex-end;
+  height: 90px;
+  gap: 3px;
+}
+
+.extras-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.extras-bar-val {
+  font-size: 0.58rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+  height: 11px;
+  line-height: 11px;
+}
+
+.extras-bar {
+  width: 100%;
+  min-height: 3px;
+  border-radius: 3px 3px 0 0;
+  transition: opacity 0.18s;
+  cursor: default;
+}
+
+.extras-bar:hover {
+  opacity: 0.7;
+}
+
+.extras-bar-lbl {
+  font-size: 0.55rem;
+  color: var(--muted);
+  margin-top: 3px;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .extras-charts-row {
+    grid-template-columns: 1fr;
+  }
+}
