@@ -3,7 +3,8 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/db.php';
 
-function session_start_safe(): void {
+function session_start_safe(): void
+{
     if (session_status() === PHP_SESSION_NONE) {
         session_name(SESSION_NAME);
         $isLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'], true);
@@ -18,7 +19,8 @@ function session_start_safe(): void {
     }
 }
 
-function require_login(): void {
+function require_login(): void
+{
     session_start_safe();
     if (empty($_SESSION['user_id'])) {
         header('Location: /login.php');
@@ -26,7 +28,8 @@ function require_login(): void {
     }
 }
 
-function current_user(): ?array {
+function current_user(): ?array
+{
     session_start_safe();
     if (empty($_SESSION['user_id'])) return null;
     static $user = null;
@@ -38,7 +41,8 @@ function current_user(): ?array {
     return $user;
 }
 
-function login(string $email, string $pass): bool {
+function login(string $email, string $pass): bool
+{
     session_start_safe();
     $st = db()->prepare('SELECT * FROM dashboard_users WHERE email = ?');
     $st->execute([strtolower(trim($email))]);
@@ -47,15 +51,31 @@ function login(string $email, string $pass): bool {
         session_regenerate_id(true);
         $_SESSION['user_id'] = $row['id'];
         db()->prepare('UPDATE dashboard_users SET last_login = ? WHERE id = ?')
-             ->execute([date('Y-m-d H:i:s'), $row['id']]);
+            ->execute([date('Y-m-d H:i:s'), $row['id']]);
         return true;
     }
     return false;
 }
 
-function logout(): void {
+function logout(): void
+{
     session_start_safe();
     session_unset();
+
+    // Expire the session cookie immediately
+    if (ini_get('session.use_cookies')) {
+        $p = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $p['path'],
+            $p['domain'],
+            $p['secure'],
+            $p['httponly']
+        );
+    }
+
     session_destroy();
     header('Location: /login.php');
     exit;
