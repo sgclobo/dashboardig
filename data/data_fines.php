@@ -6,7 +6,7 @@
 $host   = 'localhost';
 $dbname = 'u781534777_aifaesa';
 $user   = 'u781534777_SL_aifaesa';
-$pass   = 'YOUR_NEW_PASSWORD_HERE';   // ← update after changing it in hPanel
+$pass   = 'S3rgio@1060';   // ← update after changing it in hPanel
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass, [
