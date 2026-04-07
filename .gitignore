@@ -1,0 +1,16 @@
+# Credentials — never commit
+config.php
+config.local.php
+.env
+
+# Local SQLite database (dev only)
+local_dev/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE (keep tasks.json — useful for the team)
+.vscode/settings.json
+*.swp
+*.swo
