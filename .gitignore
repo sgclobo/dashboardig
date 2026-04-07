@@ -1,5 +1,4 @@
 # Credentials — never commit
-config.php
 config.local.php
 .env
 
