@@ -4,10 +4,12 @@
 --  Database: aifaesa_dashboard
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS aifaesa_dashboard
+-- Database must already exist on Hostinger (created via control panel)
+-- Run this script against: u781534777_dashboard
+CREATE DATABASE IF NOT EXISTS u781534777_dashboard
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE aifaesa_dashboard;
+USE u781534777_dashboard;
 
 -- ------------------------------------------------------------
 -- Dashboard users (login to the dashboard itself)

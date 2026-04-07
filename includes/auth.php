@@ -46,8 +46,8 @@ function login(string $email, string $pass): bool {
     if ($row && password_verify($pass, $row['password'])) {
         session_regenerate_id(true);
         $_SESSION['user_id'] = $row['id'];
-        db()->prepare("UPDATE dashboard_users SET last_login = datetime('now') WHERE id = ?")
-             ->execute([$row['id']]);
+        db()->prepare('UPDATE dashboard_users SET last_login = ? WHERE id = ?')
+             ->execute([date('Y-m-d H:i:s'), $row['id']]);
         return true;
     }
     return false;
