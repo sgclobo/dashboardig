@@ -34,17 +34,9 @@ function current_user(): ?array
     if (empty($_SESSION['user_id'])) return null;
     static $user = null;
     if ($user === null) {
-        // Try to fetch from intranet users table first
-        try {
-            $st = intranet_db()->prepare('SELECT id, username, nama_lengkap as name, email, role FROM users WHERE id = ?');
-            $st->execute([$_SESSION['user_id']]);
-            $user = $st->fetch() ?: null;
-        } catch (Exception $e) {
-            // Fallback to dashboard_users if intranet query fails
-            $st = db()->prepare('SELECT id, name, email, role FROM dashboard_users WHERE id = ?');
-            $st->execute([$_SESSION['user_id']]);
-            $user = $st->fetch() ?: null;
-        }
+        $st = intranet_db()->prepare('SELECT user_id as id, username, naran as name, email, role FROM users WHERE user_id = ?');
+        $st->execute([$_SESSION['user_id']]);
+        $user = $st->fetch() ?: null;
     }
     return $user;
 }
@@ -54,19 +46,12 @@ function login(string $username, string $pass): bool
     session_start_safe();
     try {
         // Authenticate against intranet users table (case-insensitive username match)
-        $st = intranet_db()->prepare('SELECT id, password FROM users WHERE LOWER(username) = LOWER(?)');
+        $st = intranet_db()->prepare('SELECT user_id, password FROM users WHERE LOWER(username) = LOWER(?)');
         $st->execute([trim($username)]);
         $row = $st->fetch();
         if ($row && password_verify($pass, $row['password'])) {
             session_regenerate_id(true);
-            $_SESSION['user_id'] = $row['id'];
-            // Update last login — wrapped separately so a missing column won't block login
-            try {
-                intranet_db()->prepare('UPDATE users SET last_login = ? WHERE id = ?')
-                    ->execute([date('Y-m-d H:i:s'), $row['id']]);
-            } catch (Exception $e) {
-                // Non-fatal: column may not exist
-            }
+            $_SESSION['user_id'] = $row['user_id'];
             return true;
         }
     } catch (Exception $e) {

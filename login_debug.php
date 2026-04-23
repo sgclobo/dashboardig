@@ -29,7 +29,7 @@ try {
     $cols = $db->query("SHOW COLUMNS FROM users")->fetchAll();
     foreach ($cols as $c) {
         echo "  " . $c['Field'] . " [" . $c['Type'] . "]" .
-             ($c['Null'] === 'YES' ? ' NULL' : '') . "\n";
+            ($c['Null'] === 'YES' ? ' NULL' : '') . "\n";
     }
     echo "\n";
 } catch (Exception $e) {
@@ -39,9 +39,9 @@ try {
 // 3. Show sample usernames (no passwords)
 echo "=== Sample usernames (first 5 rows) ===\n";
 try {
-    $rows = $db->query("SELECT id, username FROM users LIMIT 5")->fetchAll();
+    $rows = $db->query("SELECT user_id, username FROM users LIMIT 5")->fetchAll();
     foreach ($rows as $r) {
-        echo "  id=" . $r['id'] . " username=" . $r['username'] . "\n";
+        echo "  user_id=" . $r['user_id'] . " username=" . $r['username'] . "\n";
     }
     echo "\n";
 } catch (Exception $e) {
