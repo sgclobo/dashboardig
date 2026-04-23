@@ -53,22 +53,24 @@ function login(string $username, string $pass): bool
 {
     session_start_safe();
     try {
-        // Authenticate against intranet users table
-        $st = intranet_db()->prepare('SELECT id, password FROM users WHERE username = ?');
-        $st->execute([strtolower(trim($username))]);
+        // Authenticate against intranet users table (case-insensitive username match)
+        $st = intranet_db()->prepare('SELECT id, password FROM users WHERE LOWER(username) = LOWER(?)');
+        $st->execute([trim($username)]);
         $row = $st->fetch();
         if ($row && password_verify($pass, $row['password'])) {
             session_regenerate_id(true);
             $_SESSION['user_id'] = $row['id'];
-            // Update last login in intranet database
-            intranet_db()->prepare('UPDATE users SET last_login = ? WHERE id = ?')
-                ->execute([date('Y-m-d H:i:s'), $row['id']]);
+            // Update last login — wrapped separately so a missing column won't block login
+            try {
+                intranet_db()->prepare('UPDATE users SET last_login = ? WHERE id = ?')
+                    ->execute([date('Y-m-d H:i:s'), $row['id']]);
+            } catch (Exception $e) {
+                // Non-fatal: column may not exist
+            }
             return true;
         }
     } catch (Exception $e) {
-        if (defined('DEBUG') && DEBUG) {
-            error_log('Login error: ' . $e->getMessage());
-        }
+        error_log('Login error: ' . $e->getMessage());
     }
     return false;
 }
