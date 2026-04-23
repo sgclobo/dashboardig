@@ -20,6 +20,12 @@ define('DB_USER', 'u781534777_dashboarduser');
 define('DB_PASS', 'S3rgio@1060');
 define('DB_SQLITE', '');
 
+// ── Source DB (users - intranet.aifaesa.org) ──────
+define('SOURCE_DB_HOST', 'localhost');
+define('SOURCE_DB_NAME', 'u781534777_intranet');
+define('SOURCE_DB_USER', 'u781534777_sergio197');
+define('SOURCE_DB_PASS', 'S3rgio@1060');
+
 // ── Source DB (inspections & fines — aifaesa.gov.tl) ──────
 define('SOURCE_DB_HOST', 'localhost');
 define('SOURCE_DB_NAME', 'u781534777_aifaesa');
