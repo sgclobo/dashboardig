@@ -48,21 +48,28 @@ try {
     echo "FAIL: " . $e->getMessage() . "\n\n";
 }
 
-// 4. Show password hash prefix for one user (first 10 chars only — enough to detect algorithm)
+// 4. Test full login flow for a user
 $testUser = $_GET['u'] ?? '';
+$testPass = $_GET['p'] ?? '';
 if ($testUser !== '') {
-    echo "=== Password hash prefix for user: " . htmlspecialchars($testUser) . " ===\n";
+    echo "=== Login test for user: " . htmlspecialchars($testUser) . " ===\n";
     try {
-        $st = $db->prepare("SELECT password FROM users WHERE LOWER(username) = LOWER(?)");
+        $st = $db->prepare("SELECT user_id, password, status FROM users WHERE LOWER(username) = LOWER(?)");
         $st->execute([trim($testUser)]);
         $row = $st->fetch();
         if ($row) {
             $hash = $row['password'];
+            echo "  user_id: " . $row['user_id'] . "\n";
+            echo "  status: " . var_export($row['status'], true) . "\n";
             echo "  Hash prefix (first 10 chars): " . substr($hash, 0, 10) . "\n";
             echo "  Hash length: " . strlen($hash) . "\n";
-            echo "  bcrypt ($2y$): " . (str_starts_with($hash, '$2y$') ? 'YES' : 'NO') . "\n";
-            echo "  MD5 (32 hex): " . (preg_match('/^[a-f0-9]{32}$/', $hash) ? 'YES' : 'NO') . "\n";
-            echo "  SHA1 (40 hex): " . (preg_match('/^[a-f0-9]{40}$/', $hash) ? 'YES' : 'NO') . "\n";
+            echo "  bcrypt (\$2y\$): " . (str_starts_with($hash, '$2y$') ? 'YES' : 'NO') . "\n";
+            if ($testPass !== '') {
+                $verify = password_verify($testPass, $hash);
+                echo "  password_verify result: " . ($verify ? 'MATCH ✓' : 'NO MATCH ✗') . "\n";
+            } else {
+                echo "  (add &p=yourpassword to test password_verify)\n";
+            }
         } else {
             echo "  User not found.\n";
         }
