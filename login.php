@@ -8,11 +8,11 @@ if (!empty($_SESSION['user_id'])) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (login($_POST['email'] ?? '', $_POST['password'] ?? '')) {
+    if (login($_POST['username'] ?? '', $_POST['password'] ?? '')) {
         header('Location: index.php');
         exit;
     }
-    $error = 'Invalid email or password.';
+    $error = 'Invalid username or password.';
 }
 ?>
 <!DOCTYPE html>
@@ -220,9 +220,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" action="login.php" autocomplete="on">
             <div class="field">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required autofocus
-                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus
+                    value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">
             </div>
             <div class="field">
                 <label for="password">Password</label>

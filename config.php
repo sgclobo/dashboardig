@@ -27,10 +27,10 @@ define('SOURCE_DB_USER', 'u781534777_sergio197');
 define('SOURCE_DB_PASS', 'S3rgio@1060');
 
 // ── Source DB (inspections & fines — aifaesa.gov.tl) ──────
-define('SOURCE_DB_HOST', 'localhost');
-define('SOURCE_DB_NAME', 'u781534777_aifaesa');
-define('SOURCE_DB_USER', 'u781534777_SL_aifaesa');
-define('SOURCE_DB_PASS', 'S3rgio@1060');
+define('AIFAESA_DB_HOST', 'localhost');
+define('AIFAESA_DB_NAME', 'u781534777_aifaesa');
+define('AIFAESA_DB_USER', 'u781534777_SL_aifaesa');
+define('AIFAESA_DB_PASS', 'S3rgio@1060');
 
 // ── Internal API tokens ───────────────────────────────────
 define('TOKEN_INSPECTIONS', 'AIFAESA_INSP_API_2026');
